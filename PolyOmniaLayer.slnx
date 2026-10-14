@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PolyOmnia.BLL/PolyOmnia.BLL.csproj" />
+  <Project Path="PolyOmnia.DAL/PolyOmnia.DAL.csproj" />
+  <Project Path="PolyOmniaLayer/PolyOmniaLayer.csproj" />
+</Solution>
