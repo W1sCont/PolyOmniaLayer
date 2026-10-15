@@ -11,6 +11,7 @@ namespace PolyOmnia.BLL.Infrastructure
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
         }
     }
 }

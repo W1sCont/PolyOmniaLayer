@@ -17,5 +17,6 @@ namespace PolyOmnia.BLL.Interfaces
         Task<bool> IsUserUnconfirmed(int id);
         Task<IEnumerable<UserDTO>> GetUsersByRole(string role);
         Task<UserDTO?> GetUserWithVideos(int userId);
+        Task<UserDTO?> Authenticate(string EmailOrLogin, string Password);
     }
 }

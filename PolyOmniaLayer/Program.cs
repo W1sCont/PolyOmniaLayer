@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
@@ -54,12 +55,22 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Аутентифікація
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Home/Login";
+        options.LogoutPath = "/Home/Logout";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    });
+
 // DI
 builder.Services.AddUnitOfWorkService();
 builder.Services.AddPolyOmniaServices();
 builder.Services.AddPolyOmniaAutoMapper();
 
 builder.Services.AddControllersWithViews();
+
 
 var app = builder.Build();
 

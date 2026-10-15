@@ -1,50 +1,175 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Configuration
+@using Microsoft.AspNetCore.Mvc.Localization
+@using PolyOmniaLayer
+@inject IHtmlLocalizer<SharedResource> SharedLocalizer
+@inject IConfiguration Configuration
+
+@{
+    var langSection = Configuration.GetSection("Lang");
+    var cultureCodes = langSection.GetChildren().Select(c => c.Key).ToList();
+
+    var currentCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var currentCultureCode = currentCultureFeature?.RequestCulture.Culture.TwoLetterISOLanguageName.ToLower() ?? "uk";
+
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"{Context.Request.Path}{Context.Request.QueryString}";
+
+    var cultureItems = cultureCodes.Select(code => new SelectListItem
+    {
+        Value = code,
+        Text = code.ToUpper(),
+        Selected = string.Equals(currentCultureCode, code, StringComparison.OrdinalIgnoreCase)
+    }).ToList();
+}
+
+<!DOCTYPE html>
+<html lang="@currentCultureCode">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - PolyOmniaLayer</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - PolyOmnia</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/PolyOmniaLayer.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">PolyOmniaLayer</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    <!-- Додано z-index: 1030 та background-color для перекриття контенту -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top px-3" style="background-color: #121215; z-index: 1030;">
+        <div class="container">
+
+            <!-- Логотип та Назва картинками -->
+            <a class="navbar-brand d-flex align-items-center gap-2 py-0" asp-controller="Home" asp-action="Index">
+                <img src="~/design/logoa.png"
+                     alt="PolyOmnia Logo"
+                     class="brand-logo-img"
+                     style="height: 32px; width: auto; object-fit: contain;" />
+                <img src="~/design/text1.png"
+                     alt="PolyOmnia"
+                     class="brand-text-img d-none d-sm-inline-block"
+                     style="height: 20px; width: auto; object-fit: contain;" />
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-light d-flex align-items-center gap-1" href="#categories">
+                            <i class="bi bi-grid-3x3-gap"></i> @SharedLocalizer["Nav_Categories"]
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Пошук (з виправленим placeholder) -->
+                <form class="d-flex me-3" role="search" asp-controller="Home" asp-action="Index" method="get">
+                    <input class="form-control form-control-poly me-2 rounded-pill px-3"
+                           type="search"
+                           name="search"
+                           placeholder="@SharedLocalizer["Nav_SearchPlaceholder"]"
+                           aria-label="Search">
+                </form>
+
+                <!-- Мова -->
+                <form asp-controller="Home"
+                      asp-action="SetLanguage"
+                      asp-route-returnUrl="@returnUrl"
+                      method="post"
+                      class="d-inline-flex align-items-center me-2">
+
+                    <div class="input-group input-group-sm rounded-2 overflow-hidden border border-secondary" style="background-color: #16161a;">
+                        <span class="input-group-text border-0 bg-transparent text-primary pe-1 ps-2 py-1">
+                            <i class="bi bi-globe fs-7"></i>
+                        </span>
+                        <select name="culture"
+                                asp-items="cultureItems"
+                                class="form-select form-select-sm border-0 bg-transparent text-light fw-semibold ps-1 pe-4 py-1 fs-7"
+                                style="cursor: pointer; width: auto; min-width: 65px; shadow: none;"
+                                onchange="this.form.submit();">
+                        </select>
+                    </div>
+                </form>
+
+                <div class="d-flex align-items-center gap-3">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <!-- Блок для залогованого користувача -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-brand dropdown-toggle d-flex align-items-center gap-2"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                <i class="bi bi-person-circle text-primary"></i>
+                                <span>@User.Identity.Name</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-secondary shadow-lg py-1 mt-1" style="z-index: 1050; min-width: 200px;">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2 fs-7" asp-controller="Account" asp-action="Profile">
+                                        <i class="bi bi-person-circle text-primary"></i>
+                                        <span>@SharedLocalizer["Nav_MyProfile"]</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2 fs-7" asp-controller="Video" asp-action="Create">
+                                        <i class="bi bi-cloud-upload text-primary"></i>
+                                        <span>@SharedLocalizer["Nav_UploadVideo"]</span>
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Admin") || User.IsInRole("Moderator"))
+                                {
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2 py-2 fs-7" asp-controller="Admin" asp-action="Categories">
+                                            <i class="bi bi-folder-fill text-warning me-2"></i>
+                                            <span>@SharedLocalizer["Nav_Categories"]</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2 py-2 fs-7" asp-controller="Admin" asp-action="ApproveUsers">
+                                            <i class="bi bi-person-check-fill text-primary me-2"></i>
+                                            <span>@SharedLocalizer["Nav_ApproveUsers"]</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2 py-2 fs-7" asp-controller="Admin" asp-action="ApproveVideos">
+                                            <i class="bi bi-collection-play-fill text-primary me-2"></i>
+                                            <span>@SharedLocalizer["Nav_ApproveVideos"]</span>
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider border-secondary my-1"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                        <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2 fs-7 text-danger">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            <span>@SharedLocalizer["Nav_Logout"]</span>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Блок для гостей -->
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-brand rounded-pill px-3">
+                            <i class="bi bi-person-fill me-1"></i> @SharedLocalizer["Nav_Profile"] / @SharedLocalizer["Nav_Login"]
+                        </a>
+                    }
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        @RenderBody()
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - PolyOmniaLayer - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+    <footer class="footer border-top border-secondary py-4 my-4 text-center text-muted">
+        <p class="mb-1">&copy; @DateTime.Now.Year - <strong style="color: var(--electric-indigo, #6366f1)">PolyOmnia</strong>. One Universe. Infinite Stories.</p>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

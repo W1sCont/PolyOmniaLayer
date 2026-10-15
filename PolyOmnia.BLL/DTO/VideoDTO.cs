@@ -16,7 +16,7 @@ namespace PolyOmnia.BLL.DTO
         public bool IsPublished { get; set; } = false;
         public bool AllowDownload { get; set; } = false;
         public int ViewCount { get; set; } = 0;
-        public int GenreId { get; set; }
+        public int CategoryId { get; set; }
         public string Category { get; set; } = string.Empty;
         public int UserId { get; set; }
         public string User { get; set; } = string.Empty;

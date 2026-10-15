@@ -8,12 +8,17 @@ using PolyOmnia.DAL.Enums;
 
 namespace PolyOmnia.BLL.Services
 {
-    public class UserService(IUnitOfWork db, IMapper mapper) : IUserService
+    public class UserService(IUnitOfWork db, IMapper mapper, IPasswordHasher passwordHasher) : IUserService
     {
         public async Task CreateUser(UserDTO model)
         {
             var user = mapper.Map<UserDTO, User>(model);
+            var (passwordHash, passwordSalt) = passwordHasher.HashPassword(model.PasswordHash);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
             await db.User.AddAsync(user);
+            await db.Save();
         }
 
         public async Task UpdateUser(UserDTO model)
@@ -30,6 +35,7 @@ namespace PolyOmnia.BLL.Services
                 throw new ValidationException($"User with id {userId} not found");
             }
             await db.User.DeleteAsync(user);
+            await db.Save();
         }
 
         public async Task<UserDTO?> GetUserById(int userId)
@@ -118,6 +124,17 @@ namespace PolyOmnia.BLL.Services
                 throw new ValidationException($"User with id {userId} not found");
 
             return mapper.Map<User, UserDTO>(user);
+        }
+
+        public async Task<UserDTO?> Authenticate(string EmailOrLogin, string Password)
+        {
+            UserDTO? user = await GetUserByLoginOrEmail(EmailOrLogin);
+            if (user == null)
+                return null;
+
+            if (passwordHasher.VerifyPassword(Password, user.PasswordHash, user.PasswordSalt))
+                return user;
+            else return null;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace PolyOmnia.DAL.Entities
         public string PasswordHash { get; set; } = string.Empty;
         public string PasswordSalt { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public UserRole Role { get; set; } = UserRole.User;
+        public UserRole Role { get; set; } = UserRole.Unconfirmed;
         public bool IsPublished { get; set; } = false;
         public bool IsApproved { get; set; } = false;
         public ICollection<Video> Videos { get; set; } = new List<Video>();

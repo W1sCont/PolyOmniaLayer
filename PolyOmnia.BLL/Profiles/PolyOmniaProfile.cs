@@ -8,13 +8,19 @@ namespace PolyOmnia.BLL.Profiles
     {
         public PolyOmniaProfile()
         {
-            CreateMap<User, UserDTO>();
+            CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<UserDTO, User>()
+                .ForMember(dest => dest.Videos, opt => opt.Ignore());
 
             CreateMap<Video, VideoDTO>()
-                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User.Name));
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User != null ? src.User.Name : null));
 
-            CreateMap<Category, CategoryDTO>();
+            CreateMap<VideoDTO, Video>()
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore());
+
+            CreateMap<Category, CategoryDTO>().ReverseMap();
         }
     }
 }
