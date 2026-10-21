@@ -1,4 +1,5 @@
-﻿using PolyOmnia.DAL.Enums;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using PolyOmnia.DAL.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace PolyOmniaLayer.Models
@@ -14,6 +15,8 @@ namespace PolyOmniaLayer.Models
 
         [Required(ErrorMessage = "Оберіть жанр")]
         public int CategoryId { get; set; }
+
+        public IEnumerable<SelectListItem>? Categories { get; set; }
 
         public VideoSourceType SourceType { get; set; } = VideoSourceType.LocalFile;
 

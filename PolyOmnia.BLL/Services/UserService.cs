@@ -136,5 +136,13 @@ namespace PolyOmnia.BLL.Services
                 return user;
             else return null;
         }
+
+        public async Task<IEnumerable<VideoDTO>> GetVideoList(int userId)
+        {
+            IEnumerable<Video?> videoList = await db.Video.GetVideoListByUserIdAsync(userId);
+            if (!videoList.Any())
+                return null;
+            return mapper.Map<IEnumerable<Video>, IEnumerable<VideoDTO>>(videoList);
+        }
     }
 }

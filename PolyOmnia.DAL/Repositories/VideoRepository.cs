@@ -3,6 +3,7 @@ using PolyOmnia.DAL.EF;
 using PolyOmnia.DAL.Entities;
 using PolyOmnia.DAL.Interfaces;
 
+
 namespace PolyOmnia.DAL.Repositories
 {
     public class VideoRepository : EFRepository<Video>, IVideoRepository
@@ -34,6 +35,15 @@ namespace PolyOmnia.DAL.Repositories
                 .Include(v => v.User)
                 .Include(v => v.Category)
                 .FirstOrDefaultAsync(v => v.Id == id);
+        }
+
+        public async Task<IEnumerable<Video>> GetVideoListByUserIdAsync(int id)
+        {
+            return await _context.Videos.AsNoTracking()
+                .Include(v => v.User)
+                .Include(v => v.Category)
+                .Where(v => v.UserId == id)
+                .ToListAsync();
         }
     }
 }

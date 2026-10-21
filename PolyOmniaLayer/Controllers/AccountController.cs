@@ -95,42 +95,33 @@ namespace PolyOmniaLayer.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
-        //[Authorize]
-        //public async Task<IActionResult> Profile()
-        //{
-        //    // 1. Отримуємо Claim з ID залогіненого користувача
-        //    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-        //    {
-        //        return RedirectToAction("Login");
-        //    }
 
-        //    var user = await userService.GetUserWithVideos(userId);
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            // 1. Отримуємо Claim з ID залогіненого користувача
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return RedirectToAction("Login");
+            }
 
-        //    var model = new UserProfileViewModel
-        //    {
-        //        UserId = user.Id,
-        //        Username = user.Login,
-        //        Email = user.Email,
-        //        RegisteredAt = user.CreatedAt,
+            var user = await userService.GetUserWithVideos(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-        //        UserVideos = user.Videos.Select(v => new UserVideoItemViewModel
-        //        {
-        //            Id = v.Id,
-        //            Title = v.Title,
-        //            Description = v.Description ?? @localizer["Video_NoDescription"],
-        //            ThumbnailUrlOrPath = v.ThumbnailUrlOrPath,
-        //            ViewCount = v.ViewCount,
-        //            CreatedAt = v.CreatedAt,
-        //            AllowDownload = v.AllowDownload
-        //        }).ToList()
-        //    };
+            var model = new UserProfileDTO
+            {
+                UserId = user.Id,
+                Username = user.Login,
+                Email = user.Email,
+                RegisteredAt = user.CreatedAt,
+                UserVideos = await userService.GetVideoList(userId)
+            };
 
-        //    return View(model);
-        //}
+            return View(model);
+        }
     }
 }

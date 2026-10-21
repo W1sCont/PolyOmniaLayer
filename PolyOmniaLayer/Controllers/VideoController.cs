@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PolyOmnia.BLL.DTO;
 using PolyOmnia.BLL.Interfaces;
+using PolyOmnia.DAL.Entities;
 using PolyOmnia.DAL.Enums;
 using PolyOmniaLayer.Helper;
 using PolyOmniaLayer.Models;
@@ -25,7 +26,17 @@ namespace PolyOmniaLayer.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            return View(new CreateVideoViewModel());
+            var categories = await _categoryService.GetAllCategories();
+            var model = new CreateVideoViewModel
+            {
+                Categories = categories.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                })
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -44,8 +55,17 @@ namespace PolyOmniaLayer.Controllers
 
             if (!ModelState.IsValid)
             {
-                var category = await _videoService.GetApprovedVideos();
-                ViewBag.Category = new SelectList(category, "Id", "Name");
+                var categories = await _categoryService.GetAllCategories();
+
+                model = new CreateVideoViewModel
+                {
+                    Categories = categories.Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    })
+                };
+
                 return View(model);
             }
 

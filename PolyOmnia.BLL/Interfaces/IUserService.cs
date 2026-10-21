@@ -18,5 +18,6 @@ namespace PolyOmnia.BLL.Interfaces
         Task<IEnumerable<UserDTO>> GetUsersByRole(string role);
         Task<UserDTO?> GetUserWithVideos(int userId);
         Task<UserDTO?> Authenticate(string EmailOrLogin, string Password);
+        Task<IEnumerable<VideoDTO>> GetVideoList(int userId);
     }
 }
