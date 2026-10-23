@@ -16,6 +16,7 @@ namespace PolyOmnia.BLL.Services
             var (passwordHash, passwordSalt) = passwordHasher.HashPassword(model.PasswordHash);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+            user.Role = UserRole.Unconfirmed;
 
             await db.User.AddAsync(user);
             await db.Save();
@@ -25,6 +26,7 @@ namespace PolyOmnia.BLL.Services
         {
             var user = mapper.Map<UserDTO, User>(model);
             await db.User.UpdateAsync(user);
+            await db.Save();
         }
 
         public async Task DeleteUser(int userId)
@@ -69,7 +71,7 @@ namespace PolyOmnia.BLL.Services
         {
             var user = await db.User.GetByLoginOrEmailAsync(emailOrLogin);
             if (user == null)
-                throw new ValidationException($"User with login or email {emailOrLogin} not found");
+                return null;
 
             return mapper.Map<User, UserDTO>(user);
         }
@@ -97,15 +99,12 @@ namespace PolyOmnia.BLL.Services
             
             user.Role = parsedRole;
             await db.User.UpdateAsync(user);
+            await db.Save();
         }
 
         public async Task<bool> IsUserUnconfirmed(int id)
         {
-            var user = await db.User.GetByIdAsync(id);
-            if (user == null)
-                throw new ValidationException($"User with id {id} not found");
-            
-            return user.Role == UserRole.Unconfirmed;
+            return await db.User.IsUserUnconfirmedAsync(id);
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsersByRole(string role)

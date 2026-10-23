@@ -426,4 +426,10 @@
   <data name="Btn_UploadNewVideo" xml:space="preserve">
     <value>Upload new video</value>
   </data>
+  <data name="Category_Edit" xml:space="preserve">
+    <value>Edit category</value>
+  </data>
+  <data name="Btn_SaveChanges" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
 </root>

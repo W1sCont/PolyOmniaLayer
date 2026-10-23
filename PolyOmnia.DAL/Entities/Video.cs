@@ -19,7 +19,7 @@ namespace PolyOmnia.DAL.Entities
         public bool IsPublished { get; set; } = false;
         public bool AllowDownload { get; set; } = false;
         public int ViewCount { get; set; } = 0;
-        public int GenreId { get; set; }
+        public int CategoryId { get; set; }
         public Category? Category { get; set; }
         public int UserId { get; set; }
         public User User { get; set; } = null!;

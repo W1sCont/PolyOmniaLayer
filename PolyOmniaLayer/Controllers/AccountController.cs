@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using PolyOmnia.BLL.DTO;
 using PolyOmnia.BLL.Interfaces;
+using PolyOmnia.DAL.Entities;
 using PolyOmniaLayer.Helper;
 using PolyOmniaLayer.Models;
 using System.Security.Claims;
@@ -23,36 +24,38 @@ namespace PolyOmniaLayer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-
-            if (model.Password != model.ConfirmPassword)
+            try
             {
-                ModelState.AddModelError("ConfirmPassword", localizer["Err_PasswordsDoNotMatch"]);
-                return View(model);
+                if (!ModelState.IsValid) return View(model);
+
+                if (model.Password != model.ConfirmPassword)
+                {
+                    ModelState.AddModelError("ConfirmPassword", localizer["Err_PasswordsDoNotMatch"]);
+                    return View(model);
+                }
+
+                if (!await userService.IsLoginUnique(model.Login))
+                {
+                    ModelState.AddModelError("Login", localizer["Err_LoginAlreadyExists"]);
+                    return View(model);
+                }
+
+                if (!await userService.IsEmailUnique(model.Email))
+                {
+                    ModelState.AddModelError("Email", localizer["Err_EmailAlreadyExists"]);
+                    return View(model);
+                }
+
+                UserDTO user = UserRegToDTO.ConvertToUserDTO(model);
+                await userService.CreateUser(user);
+
+                return RedirectToAction("Login");
             }
-
-            if (!await userService.IsLoginUnique(model.Login))
-            {
-                ModelState.AddModelError("Login", localizer["Err_LoginAlreadyExists"]);
-                return View(model);
-            }
-
-            if (!await userService.IsEmailUnique(model.Email))
-            {
-                ModelState.AddModelError("Email", localizer["Err_EmailAlreadyExists"]);
-                return View(model);
-            }
-
-            UserDTO user  = UserRegToDTO.ConvertToUserDTO(model);
-            await userService.CreateUser(user);
-
-            if (await userService.IsEmailUnique(model.Email))
+            catch
             {
                 ModelState.AddModelError("", "Error");
                 return View(model);
             }
-
-            return RedirectToAction("Login");
         }
 
         public IActionResult Login()
@@ -60,19 +63,27 @@ namespace PolyOmniaLayer.Controllers
             return View();
         }
 
-[HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-            var userDto = await userService.Authenticate(model.EmailOrLogin, model.Password);
-            if (userDto == null)
+            try
             {
-                ModelState.AddModelError("", localizer["Err_InvalidLoginOrEmail"]);
-                return View(model);
-            }
+                if (!ModelState.IsValid) return View(model);
+                var userDto = await userService.Authenticate(model.EmailOrLogin, model.Password);
+                if (userDto == null)
+                {
+                    ModelState.AddModelError("", localizer["Err_InvalidLoginOrEmail"]);
+                    return View(model);
+                }
 
-            var claims = new List<Claim>
+                if (await userService.IsUserUnconfirmed(userDto.Id))
+                {
+                    ModelState.AddModelError("EmailOrLogin", localizer["Err_UserNotConfirmed"]);
+                    return View(model);
+                }
+
+                var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userDto.Id.ToString()),
                 new Claim(ClaimTypes.Name, userDto.Login),
@@ -80,13 +91,19 @@ namespace PolyOmniaLayer.Controllers
                 new Claim(ClaimTypes.Role, userDto.Role.ToString())
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                new AuthenticationProperties { IsPersistent = true });
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    new AuthenticationProperties { IsPersistent = true });
 
-            return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Home");
+            }
+            catch
+            {
+                ModelState.AddModelError("", localizer["Err_InvalidLoginOrEmail"]);
+                return View(model);
+            }
         }
 
         [HttpPost]
@@ -99,7 +116,7 @@ namespace PolyOmniaLayer.Controllers
         [Authorize]
         public async Task<IActionResult> Profile()
         {
-            // 1. Отримуємо Claim з ID залогіненого користувача
+            // Отримуємо Claim з ID залогіненого користувача
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {

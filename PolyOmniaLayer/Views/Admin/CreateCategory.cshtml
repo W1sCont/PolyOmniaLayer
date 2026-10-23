@@ -1,5 +1,47 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> SharedLocalizer
+@model PolyOmnia.BLL.DTO.CategoryDTO
+
 @{
+    bool isEdit = Model != null && Model.Id > 0;
+    ViewData["Title"] = isEdit ? SharedLocalizer["Category_Edit"] : SharedLocalizer["Category_New"];
 }
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card bg-dark text-white border-secondary shadow-lg">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-center mb-4 font-monospace">
+                        <i class="bi bi-folder-fill text-warning me-2"></i>
+                        @(isEdit ? SharedLocalizer["Category_Edit"] : SharedLocalizer["Category_New"])
+                    </h4>
+
+                    <!-- Динамічний asp-action залежно від операції -->
+                    <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- Обов'язкове приховане поле для Id -->
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                        }
+
+                        <div class="mb-4">
+                            <label asp-for="Name" class="form-label">@SharedLocalizer["Category_CategoryName"]</label>
+                            <input asp-for="Name" class="form-control bg-dark text-white border-secondary" placeholder="@SharedLocalizer["Placeholder_CategoryExample"]" autofocus />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary font-monospace">
+                                <i class="bi bi-save me-1"></i> @(isEdit ? SharedLocalizer["Btn_SaveChanges"] : SharedLocalizer["Btn_Save"])
+                            </button>
+                            <a asp-action="Categories" class="btn btn-outline-secondary">@SharedLocalizer["Btn_Cancel"]</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

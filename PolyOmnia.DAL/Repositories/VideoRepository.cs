@@ -45,5 +45,25 @@ namespace PolyOmnia.DAL.Repositories
                 .Where(v => v.UserId == id)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Video>> GetPendingVideosAsync()
+        {
+            return await _context.Videos.AsNoTracking()
+                .Include(v => v.Category)
+                .Include(v => v.User)
+                .Where(v => !v.IsApproved)
+                .OrderByDescending(v => v.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task ApproveVideoAsync(int videoId)
+        {
+            var video = await _context.Videos.FindAsync(videoId);
+            if (video != null)
+            {
+                video.IsApproved = true;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

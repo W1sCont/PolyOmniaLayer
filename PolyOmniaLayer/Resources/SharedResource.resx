@@ -426,4 +426,10 @@
   <data name="Btn_UploadNewVideo" xml:space="preserve">
     <value>Завантажити нове відео</value>
   </data>
+  <data name="Category_Edit" xml:space="preserve">
+    <value>Редагувати категорію</value>
+  </data>
+  <data name="Btn_SaveChanges" xml:space="preserve">
+    <value>Зберегти зміни</value>
+  </data>
 </root>

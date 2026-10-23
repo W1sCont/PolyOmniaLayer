@@ -63,8 +63,7 @@ namespace PolyOmnia.DAL.Migrations
                     IsPublished = table.Column<bool>(type: "bit", nullable: false),
                     AllowDownload = table.Column<bool>(type: "bit", nullable: false),
                     ViewCount = table.Column<int>(type: "int", nullable: false),
-                    GenreId = table.Column<int>(type: "int", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: true),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -74,7 +73,8 @@ namespace PolyOmnia.DAL.Migrations
                         name: "FK_Videos_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Videos_Users_UserId",
                         column: x => x.UserId,

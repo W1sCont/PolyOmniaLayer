@@ -99,7 +99,7 @@ namespace PolyOmnia.DAL.Migrations
                     b.Property<bool>("AllowDownload")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -111,9 +111,6 @@ namespace PolyOmnia.DAL.Migrations
                     b.Property<string>("Duration")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GenreId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
@@ -154,7 +151,9 @@ namespace PolyOmnia.DAL.Migrations
                 {
                     b.HasOne("PolyOmnia.DAL.Entities.Category", "Category")
                         .WithMany("Videos")
-                        .HasForeignKey("CategoryId");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("PolyOmnia.DAL.Entities.User", "User")
                         .WithMany("Videos")

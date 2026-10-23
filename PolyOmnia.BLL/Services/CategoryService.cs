@@ -13,11 +13,13 @@ namespace PolyOmnia.BLL.Services
         {
             var category = mapper.Map<CategoryDTO, Category>(categoryDTO);
             await db.Category.AddAsync(category);
+            await db.Save();
         }
         public async Task UpdateCategory(CategoryDTO categoryDTO)
         {
             var category = mapper.Map<CategoryDTO, Category>(categoryDTO);
             await db.Category.UpdateAsync(category);
+            await db.Save();
         }
         public async Task DeleteCategory(CategoryDTO categoryDTO)
         {
@@ -27,6 +29,7 @@ namespace PolyOmnia.BLL.Services
                 throw new ValidationException($"Category with id {categoryDTO.Id} not found");
             }
             await db.Category.DeleteAsync(category);
+            await db.Save();
         }
         public async Task<CategoryDTO?> GetCategoryById(int categoryId)
         {

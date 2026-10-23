@@ -18,11 +18,11 @@ namespace PolyOmnia.BLL.Services
 
         public async Task UpdateVideo(VideoDTO videoDTO)
         { 
-            var existingVideo = db.Video.GetByIdWithDetailsAsync(videoDTO.Id);
+            var existingVideo = await db.Video.GetByIdWithDetailsAsync(videoDTO.Id);
             if (existingVideo == null)
                 throw new ValidationException($"Video with id {videoDTO.Id} not found");
 
-            var video = mapper.Map<VideoDTO, Video>(videoDTO);
+            mapper.Map(videoDTO, existingVideo);
             await db.Save();
         }
 
@@ -57,6 +57,32 @@ namespace PolyOmnia.BLL.Services
                 throw new ValidationException($"Video with id {id} not found");
             }
             return mapper.Map<Video, VideoDTO>(video);
+        }
+
+        public async Task<IEnumerable<VideoDTO>> GetApprovedVideosAsync()
+        {
+            var video = await db.Video.GetApprovedVideosAsync();
+            return mapper.Map<IEnumerable<Video>, IEnumerable<VideoDTO>>(video);
+        }
+
+        public async Task<IEnumerable<VideoDTO>> GetPendingVideosAsync()
+        {
+            var video =  await db.Video.GetPendingVideosAsync();
+            return mapper.Map<IEnumerable<Video>, IEnumerable<VideoDTO>>(video);
+        }
+
+        public async Task ApproveVideoAsync(int videoId)
+        {
+            await db.Video.ApproveVideoAsync(videoId);
+        }
+
+        public async Task DeleteVideoById(int id)
+        {
+            var video = await db.Video.GetByIdAsync(id);
+            if(video == null) throw new ValidationException($"Video with id {id} not found");
+
+            await db.Video.DeleteAsync(video);
+            await db.Save();
         }
     }
 }

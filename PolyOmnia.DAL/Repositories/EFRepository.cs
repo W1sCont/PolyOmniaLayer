@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PolyOmnia.DAL.EF;
 using PolyOmnia.DAL.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using EFCore = Microsoft.EntityFrameworkCore.EF;
 
 namespace PolyOmnia.DAL.Repositories
 {
@@ -16,11 +14,10 @@ namespace PolyOmnia.DAL.Repositories
             _context = context;
         }
         public async Task<IEnumerable<T>> GetAllAsync() =>
-            await _context.Set<T>().ToListAsync();
+            await _context.Set<T>().AsNoTracking().ToListAsync();
 
         public async Task<T?> GetByIdAsync(int id) =>
-            await _context.Set<T>().FindAsync(id);
-
+            await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => EFCore.Property<int>(e, "Id") == id);
         public async Task AddAsync(T entity)
         {
             await _context.Set<T>().AddAsync(entity);
