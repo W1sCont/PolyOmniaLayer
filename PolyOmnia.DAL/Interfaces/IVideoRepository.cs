@@ -1,4 +1,5 @@
 ﻿using PolyOmnia.DAL.Entities;
+using PolyOmnia.DAL.Enums;
 
 namespace PolyOmnia.DAL.Interfaces
 {

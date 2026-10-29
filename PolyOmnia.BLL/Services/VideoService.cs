@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PolyOmnia.BLL.DTO;
 using PolyOmnia.BLL.Interfaces;
 using PolyOmnia.DAL.Entities;
@@ -36,7 +37,6 @@ namespace PolyOmnia.BLL.Services
             await db.Video.DeleteAsync(video);
             await db.Save();
         }
-
         public async Task<IEnumerable<VideoDTO>> GetApprovedVideos()
         {
             var videos = await db.Video.GetApprovedVideosAsync();

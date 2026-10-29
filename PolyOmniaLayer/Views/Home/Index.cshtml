@@ -1,30 +1,32 @@
 ﻿﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IHtmlLocalizer<SharedResource> SharedLocalizer
-@model PolyOmniaLayer.Models.HomeViewModel
+@model PolyOmniaLayer.Models.Page.IndexViewModel
 @{
     ViewData["Title"] = @SharedLocalizer["Home_Title"];
+    @addTagHelper *, PolyOmniaLayer
 }
 
+
 <!-- HERO BANNER -->
-@if (Model.HeroVideo != null)
+@if (Model.home.HeroVideo != null)
 {
     <div class="hero-banner p-4 p-md-5 mb-5 position-relative shadow-lg">
         <div class="row align-items-center">
             <div class="col-lg-7">
                 <span class="badge mb-2 px-3 py-2 rounded-pill" style="background-color: var(--electric-indigo)">
-                    @(Model.HeroVideo.Category ?? SharedLocalizer["Label_Default"].Value)
+                    @(Model.home.HeroVideo.Category ?? SharedLocalizer["Label_Default"].Value)
                 </span>
-                <h1 class="display-5 fw-bold text-white mb-3">@Model.HeroVideo.Title</h1>
-                <p class="text-muted mb-2">@SharedLocalizer["Label_Author"]: <span class="text-light fw-semibold">@(Model.HeroVideo.User ?? SharedLocalizer["Label_User"].Value)</span></p>
-                <p class="lead text-light opacity-75">@Model.HeroVideo.Description</p>
+                <h1 class="display-5 fw-bold text-white mb-3">@Model.home.HeroVideo.Title</h1>
+                <p class="text-muted mb-2">@SharedLocalizer["Label_Author"]: <span class="text-light fw-semibold">@(Model.home.HeroVideo.User ?? SharedLocalizer["Label_User"].Value)</span></p>
+                <p class="lead text-light opacity-75">@Model.home.HeroVideo.Description</p>
 
                 <div class="d-flex gap-3 mt-4">
-                    <a asp-controller="Video" asp-action="Watch" asp-route-id="@Model.HeroVideo.Id" class="btn btn-brand px-4 py-2 rounded-pill">
+                    <a asp-controller="Video" asp-action="Watch" asp-route-id="@Model.home.HeroVideo.Id" class="btn btn-brand px-4 py-2 rounded-pill">
                         <i class="bi bi-play-fill fs-5 align-middle me-1"></i> @SharedLocalizer["Btn_WatchNow"]
                     </a>
-                    @if (Model.HeroVideo.AllowDownload)
+                    @if (Model.home.HeroVideo.AllowDownload)
                     {
-                        <a asp-controller="Video" asp-action="Download" asp-route-id="@Model.HeroVideo.Id" class="btn btn-outline-brand px-4 py-2 rounded-pill">
+                        <a asp-controller="Video" asp-action="Download" asp-route-id="@Model.home.HeroVideo.Id" class="btn btn-outline-brand px-4 py-2 rounded-pill">
                             <i class="bi bi-download me-1"></i> @SharedLocalizer["Btn_Download"]
                         </a>
                     }
@@ -33,11 +35,11 @@
 
             <!-- Права колонка: Інтерактивне прев'ю відео -->
             <div class="col-lg-5 mt-4 mt-lg-0 text-center">
-                <a asp-controller="Video" asp-action="Watch" asp-route-id="@Model.HeroVideo.Id" class="text-decoration-none">
+                <a asp-controller="Video" asp-action="Watch" asp-route-id="@Model.home.HeroVideo.Id" class="text-decoration-none">
                     <div class="position-relative ratio ratio-16x9 rounded-4 overflow-hidden border border-secondary shadow" style="background-color: #101014;">
-                        @if (!string.IsNullOrEmpty(Model.HeroVideo.ThumbnailUrlOrPath))
+                        @if (!string.IsNullOrEmpty(Model.home.HeroVideo.ThumbnailUrlOrPath))
                         {
-                            <img src="@Model.HeroVideo.ThumbnailUrlOrPath" class="card-img-top w-100 h-100 object-fit-cover" alt="@Model.HeroVideo.Title" />
+                            <img src="@Model.home.HeroVideo.ThumbnailUrlOrPath" class="card-img-top w-100 h-100 object-fit-cover" alt="@Model.home.HeroVideo.Title" />
                         }
                         else
                         {
@@ -62,14 +64,14 @@
 <div id="categories" class="mb-4">
     <h6 class="text-uppercase fw-bold mb-3" style="color: var(--text-muted); letter-spacing: 1px;">@SharedLocalizer["Nav_Categories"]</h6>
     <div class="d-flex flex-wrap gap-2">
-        <a asp-action="Index" class="btn btn-sm rounded-pill px-3 @(Model.SelectedCategoryId == null ? "btn-brand" : "btn-outline-secondary text-light")">
+        <a asp-action="Index" class="btn btn-sm rounded-pill px-3 @(Model.home.SelectedCategoryId == null ? "btn-brand" : "btn-outline-secondary text-light")">
             @SharedLocalizer["Category_All"]
         </a>
-        @foreach (var genre in Model.Category)
+        @foreach (var category in Model.home.Category)
         {
-            <a asp-action="Index" asp-route-genreId="@genre.Id"
-               class="btn btn-sm rounded-pill px-3 @(Model.SelectedCategoryId == genre.Id ? "btn-brand" : "btn-outline-secondary text-light")">
-                @genre.Name
+            <a asp-action="Index" asp-route-categoryId="@category.Id"
+               class="btn btn-sm rounded-pill px-3 @(Model.home.SelectedCategoryId == category.Id ? "btn-brand" : "btn-outline-secondary text-light")">
+                @category.Name
             </a>
         }
     </div>
@@ -77,7 +79,7 @@
 
 <!-- СІТКА ВІДЕО -->
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    @foreach (var video in Model.Videos)
+    @foreach (var video in Model.home.Videos)
     {
         <div class="col">
             <div class="card poly-card h-100">
@@ -138,10 +140,12 @@
     }
 </div>
 <!-- ПАГІНАЦІЯ -->
-<nav class="mt-5">
-    <ul class="pagination justify-content-center pagination-sm">
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-    </ul>
-</nav>
+@if (Model.PageViewModel.TotalPages > 1)
+{
+    <page-link page-model="Model.PageViewModel"
+               page-action="Index"
+               page-url-searchQuery="@Model.FilterViewModel.SelectedName"
+               page-url-categoryId="@Model.FilterViewModel.SelectedCategory"
+               page-url-sortOrder="@Model.SortViewModel.Current">
+    </page-link>
+}
